@@ -8,6 +8,8 @@
     "start": "node src"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "axios": "^1.6.2",
+    "express": "^4.18.2",
+    "lodash": "^4.17.21"
   }
 }
