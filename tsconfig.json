@@ -11,6 +11,6 @@
     "allowJs": true,
     "checkJs": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/config/configuration.js"],
   "exclude": ["node_modules"]
 }
