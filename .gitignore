@@ -1,0 +1,7 @@
+# Dependency directories
+node_modules/
+
+# Ignore Javascript files built from Typescript
+*.js
+*.js.map
+

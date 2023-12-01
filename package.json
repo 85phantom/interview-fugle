@@ -1,0 +1,13 @@
+{
+  "name": "fugle-interview",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "./script/build-clean.sh && tsc -p tsconfig.json",
+    "start": "node src"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
