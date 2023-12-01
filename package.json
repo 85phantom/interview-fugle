@@ -11,6 +11,11 @@
     "axios": "^1.6.2",
     "config": "^3.3.9",
     "express": "^4.18.2",
-    "lodash": "^4.17.21"
+    "fs": "^0.0.1-security",
+    "lodash": "^4.17.21",
+    "redis": "^4.6.11"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.1"
   }
 }

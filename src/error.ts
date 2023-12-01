@@ -59,6 +59,12 @@ export class ValidationError extends BaseError {
   }
 }
 
+export class TooManyRequestError extends BaseError {
+  constructor(message, name, data, privateData, options: ErrorOptions) {
+    super(message, name, 429, data, privateData, options);
+  }
+}
+
 export class GeneralError extends BaseError {
   constructor(privateData, options: ErrorOptions) {
     super(
