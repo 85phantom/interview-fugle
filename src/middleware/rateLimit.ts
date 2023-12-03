@@ -1,5 +1,5 @@
 import { RedisClientType, createClient } from 'redis';
-import fs from 'fs';
+import { promises as fs } from 'fs';
 import config from 'config';
 import { TooManyRequestError } from '../error';
 
@@ -37,7 +37,7 @@ async function countPeriodRequests(
   const userIpKey = 'ip:' + userIp;
   const unixTimeNowStr = Math.floor(Date.now() / 1000).toString();
   const filePath = config.get('lua.path');
-  const countRequestLuaScript = fs.readFileSync(filePath, 'utf-8');
+  const countRequestLuaScript = await fs.readFile(filePath, 'utf-8');
 
   const idRequestCount = (
     await redisClient.eval(countRequestLuaScript, {
