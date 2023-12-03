@@ -15,10 +15,13 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "redis": "^4.6.11",
+    "uuid": "^9.0.1",
+    "uuidv4": "^6.2.13",
     "ws": "^8.14.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.1",
+    "@types/uuid": "^9.0.7",
     "@types/ws": "^8.5.10"
   }
 }

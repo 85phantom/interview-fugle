@@ -3,6 +3,7 @@ import { SocketChannel, SocketMessage } from './schema/websocketServer';
 import _ from 'lodash';
 import { WebSocketBadRequestError } from './error';
 import { WebSocketResponse } from './schema/websocket';
+import { uuid } from 'uuidv4';
 
 export class WebSocketServerService {
   public wss: WebSocketServer;
@@ -16,10 +17,17 @@ export class WebSocketServerService {
     this.wss.on('connection', (ws, req) => {
       console.log('Client connected');
 
-      ws.on('message', (m) => {
-        const message = JSON.parse(m.toString()) as SocketMessage;
-        const { event, data } = message;
-        this.updateSocketChannelListByEvent(event, data, ws);
+      ws.on('message', (s) => {
+        try {
+          const message = JSON.parse(s.toString()) as SocketMessage;
+          if (!this.isSocketRequestVaild(message)) {
+            throw new WebSocketBadRequestError({});
+          }
+          const { event, data } = message;
+          this.updateSocketChannelListByEvent(event, data, ws, uuid());
+        } catch (error) {
+          ws.send(JSON.stringify(error));
+        }
       });
 
       //當 WebSocket 的連線關閉時執行
@@ -49,6 +57,7 @@ export class WebSocketServerService {
   private subscribeChannel(channel: string, ws: WebSocket, id: string) {
     this.socketChannelList.push({
       socket: ws,
+      id: id,
       channel: `live_trades_${channel}`,
     });
 
@@ -62,7 +71,7 @@ export class WebSocketServerService {
   }
   private unsubscribeChannel(channel: string, ws: WebSocket, id: string) {
     const socketChannel = this.socketChannelList.filter(
-      (e) => e.channel === `live_trades_${channel}`,
+      (e) => e.channel === `live_trades_${channel}` && e.id === id,
     )[0];
     const index = this.socketChannelList.indexOf(socketChannel);
     this.socketChannelList.splice(index, 1);
