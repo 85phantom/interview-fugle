@@ -9,6 +9,7 @@ import {
 } from './schema/websocket';
 import moment from 'moment';
 import { WebSocketServerService } from './webSocketServer';
+import config from 'config';
 
 export class WebSocketService {
   public wsss: WebSocketServerService;
@@ -21,7 +22,7 @@ export class WebSocketService {
   constructor(wsss: WebSocketServerService) {
     this.wsss = wsss;
     this.bitstampSocket = new WebSocket('wss://ws.bitstamp.net.');
-    this.bitstampChannelList = ['btcusd', 'btceur', 'btcgbp'];
+    this.bitstampChannelList = config.get('bitstamp.currencyPairs');
     this.socketChannelList = [];
     this.bitstampDataList = [];
     this.channelOhlcList = [];
