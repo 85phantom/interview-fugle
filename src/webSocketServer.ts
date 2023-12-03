@@ -3,7 +3,7 @@ import { SocketChannel, SocketMessage } from './schema/websocketServer';
 import _ from 'lodash';
 import { WebSocketBadRequestError } from './error';
 import { WebSocketResponse } from './schema/websocket';
-import { uuid } from 'uuidv4';
+import { v4 as uuidv4 } from 'uuid';
 
 export class WebSocketServerService {
   public wss: WebSocketServer;
@@ -24,7 +24,7 @@ export class WebSocketServerService {
             throw new WebSocketBadRequestError({});
           }
           const { event, data } = message;
-          this.updateSocketChannelListByEvent(event, data, ws, uuid());
+          this.updateSocketChannelListByEvent(event, data, ws, uuidv4());
         } catch (error) {
           ws.send(JSON.stringify(error));
         }
