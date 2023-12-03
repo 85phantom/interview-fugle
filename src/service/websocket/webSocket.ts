@@ -10,6 +10,7 @@ import {
 import moment from 'moment';
 import { WebSocketServerService } from './webSocketServer';
 import config from 'config';
+import { OhlcChannelDataset } from '../../ohlcChannelDataset';
 
 export class WebSocketService {
   public wsss: WebSocketServerService;
@@ -18,14 +19,19 @@ export class WebSocketService {
   public socketChannelList: SocketChannel[];
   public bitstampDataList: BitstampData[];
   public channelOhlcList: OhlcChannel[];
+  public ohlcChannelDataset: OhlcChannelDataset;
 
-  constructor(wsss: WebSocketServerService) {
+  constructor(
+    wsss: WebSocketServerService,
+    ohlcChannelDataset: OhlcChannelDataset,
+  ) {
     this.wsss = wsss;
     this.bitstampSocket = new WebSocket('wss://ws.bitstamp.net.');
     this.bitstampChannelList = config.get('bitstamp.currencyPairs');
     this.socketChannelList = [];
     this.bitstampDataList = [];
     this.channelOhlcList = [];
+    this.ohlcChannelDataset = ohlcChannelDataset;
   }
 
   public initBitstampSockets() {
@@ -48,11 +54,8 @@ export class WebSocketService {
         this.bitstampDataList.push(bitstampData);
 
         const ohlc = this.getTagetTimeOhlc(channel, tradeDate);
-        const ohlcResponse = this.upsertChannelOhlcList(
-          channel,
-          tradeDate,
-          ohlc,
-        );
+        this.upsertChannelOhlcList(channel, tradeDate, ohlc);
+
         const socketChannelList = this.wsss.getSocketChannelList();
         const wsList = socketChannelList.filter((d) => d.channel === channel);
 
@@ -63,7 +66,6 @@ export class WebSocketService {
         };
         wsList.forEach((ws) => {
           ws.socket.send(JSON.stringify(response));
-          ws.socket.send(JSON.stringify({ ...ohlcResponse, event: 'OHLC' }));
         });
       }
 
@@ -113,14 +115,17 @@ export class WebSocketService {
     ohlc: OHLC,
   ): OhlcChannel {
     const minute = moment(time).startOf('minute').toDate();
-    let targetOhlc = this.channelOhlcList.filter(
-      (e) => e.channel === channel && e.minute === minute,
+    const channelOhlcList = this.ohlcChannelDataset.getOhlcChannel();
+
+    let targetOhlc = channelOhlcList.filter(
+      (e) => e.channel === channel && e.minute.getTime() === minute.getTime(),
     )[0];
+
     if (targetOhlc) {
       targetOhlc.ohlc = ohlc;
     } else {
       targetOhlc = { channel, minute, ohlc };
-      this.channelOhlcList.push(targetOhlc);
+      channelOhlcList.push(targetOhlc);
     }
     return targetOhlc;
   }

@@ -4,14 +4,18 @@ import _ from 'lodash';
 import { WebSocketBadRequestError } from '../../error';
 import { WebSocketResponse } from '../../schema/websocket';
 import { v4 as uuidv4 } from 'uuid';
+import { OhlcChannelDataset } from '../../ohlcChannelDataset';
+import moment from 'moment';
 
 export class WebSocketServerService {
   public wss: WebSocketServer;
   public socketChannelList: SocketChannel[];
+  public ohlcChannelDataset: OhlcChannelDataset;
 
-  constructor(server) {
+  constructor(server, ohlcChannelDataset: OhlcChannelDataset) {
     this.wss = new WebSocketServer({ server, path: '/streaming' });
     this.socketChannelList = [];
+    this.ohlcChannelDataset = ohlcChannelDataset;
   }
   public initSocketServer() {
     this.wss.on('connection', (ws, req) => {
@@ -23,8 +27,9 @@ export class WebSocketServerService {
           if (!this.isSocketRequestVaild(message)) {
             throw new WebSocketBadRequestError({});
           }
+
           const { event, data } = message;
-          this.updateSocketChannelListByEvent(event, data, ws, uuidv4());
+          this.sendResponseByEvent(event, data, ws, uuidv4());
         } catch (error) {
           ws.send(JSON.stringify(error));
         }
@@ -41,17 +46,45 @@ export class WebSocketServerService {
     return this.socketChannelList;
   }
 
-  private updateSocketChannelListByEvent(
+  private sendResponseByEvent(
     event: string,
     data: { channel: string },
     websocket: WebSocket,
     id: string,
   ) {
+    const fifteenMinuteAgeoTime = moment().subtract(15, 'minutes').toDate();
+
     if (event === 'subscribe') {
       this.subscribeChannel(data.channel, websocket, id);
     } else if (event === 'unsubscribe') {
       this.unsubscribeChannel(data.channel, websocket, id);
+    } else if (event === 'OHLC') {
+      this.getOhlcFromTime(data.channel, fifteenMinuteAgeoTime, websocket);
+    } else {
+      websocket.send(
+        JSON.stringify({
+          event: 'wrong event',
+          channel: '',
+          data: {},
+        }),
+      );
     }
+  }
+
+  private getOhlcFromTime(channel: string, time: Date, ws: WebSocket) {
+    const ohlcChannel = this.ohlcChannelDataset.getOhlcChannel();
+    const ohlcList = ohlcChannel.filter(
+      (e) =>
+        e.channel === `live_trades_${channel}` &&
+        moment(e.minute).isAfter(moment(time)),
+    );
+    const response: WebSocketResponse = {
+      event: 'ohlc',
+      channel: channel,
+      data: ohlcList,
+    };
+
+    ws.send(JSON.stringify(response));
   }
 
   private subscribeChannel(channel: string, ws: WebSocket, id: string) {
