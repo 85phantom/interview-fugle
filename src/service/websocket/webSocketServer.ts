@@ -1,8 +1,8 @@
 import { WebSocket, WebSocketServer } from 'ws';
-import { SocketChannel, SocketMessage } from './schema/websocketServer';
+import { SocketChannel, SocketMessage } from '../../schema/websocketServer';
 import _ from 'lodash';
-import { WebSocketBadRequestError } from './error';
-import { WebSocketResponse } from './schema/websocket';
+import { WebSocketBadRequestError } from '../../error';
+import { WebSocketResponse } from '../../schema/websocket';
 import { v4 as uuidv4 } from 'uuid';
 
 export class WebSocketServerService {

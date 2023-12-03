@@ -1,10 +1,9 @@
 import express from 'express';
 import errorHandler from './middleware/errorhandler';
-import { getDivisibleNumbers } from './divisible_numbers';
+import { getDivisibleNumbers } from './service/divisible_numbers';
 import rateLimit from './middleware/rateLimit';
-import { WebSocket, Server as SocketServer } from 'ws';
-import { WebSocketService } from './webSocket';
-import { WebSocketServerService } from './webSocketServer';
+import { WebSocketService } from './service/websocket/webSocket';
+import { WebSocketServerService } from './service/websocket/webSocketServer';
 
 const app = express();
 const port = 3000;

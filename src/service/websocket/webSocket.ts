@@ -6,7 +6,7 @@ import {
   OhlcChannel,
   SocketChannel,
   WebSocketResponse,
-} from './schema/websocket';
+} from '../../schema/websocket';
 import moment from 'moment';
 import { WebSocketServerService } from './webSocketServer';
 import config from 'config';

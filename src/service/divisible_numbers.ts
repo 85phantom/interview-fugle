@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { NextFunction, Request, Response } from 'express';
-import { ValidationError } from './error';
+import { ValidationError } from '../error';
 import config from 'config';
 
 export async function getDivisibleNumbers(
