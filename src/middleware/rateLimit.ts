@@ -22,6 +22,7 @@ const rateLimit = () => {
       await redisClient.disconnect();
       next();
     } catch (error) {
+      console.log('error:', error);
       next(error);
     }
   };

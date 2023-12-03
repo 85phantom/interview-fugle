@@ -30,6 +30,7 @@ export async function getDivisibleNumbers(
 
     return res.status(200).json({ result: divisibleNumbers });
   } catch (error) {
+    console.log('error:', error);
     next(error);
   }
 }
