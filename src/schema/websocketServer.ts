@@ -8,6 +8,6 @@ export interface SocketChannel {
 export interface SocketMessage {
   event: string;
   data: {
-    channels: string[];
+    channel: string;
   };
 }

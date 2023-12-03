@@ -7,6 +7,12 @@ export class SocketChannel {
   }
 }
 
+export interface WebSocketResponse {
+  data: any;
+  channel: string;
+  event: string;
+}
+
 export interface BitstampResponse {
   data: BitstampResponseData;
   channel: string;

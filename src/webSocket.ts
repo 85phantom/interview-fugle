@@ -5,6 +5,7 @@ import {
   OHLC,
   OhlcChannel,
   SocketChannel,
+  WebSocketResponse,
 } from './schema/websocket';
 import moment from 'moment';
 import { WebSocketServerService } from './webSocketServer';
@@ -35,11 +36,13 @@ export class WebSocketService {
     };
 
     this.bitstampSocket.onmessage = (e) => {
-      const eventData = JSON.parse(e.data.toString()) as BitstampResponse;
-      const { data, channel, event } = eventData;
+      const bitstampResponse = JSON.parse(
+        e.data.toString(),
+      ) as BitstampResponse;
+      const { data, channel, event } = bitstampResponse;
 
       if (event === 'trade') {
-        const bitstampData = new BitstampData(eventData);
+        const bitstampData = new BitstampData(bitstampResponse);
         const tradeDate = new Date(data.timestamp * 1000);
         this.bitstampDataList.push(bitstampData);
 
@@ -52,11 +55,19 @@ export class WebSocketService {
         const socketChannelList = this.wsss.getSocketChannelList();
         const wsList = socketChannelList.filter((d) => d.channel === channel);
 
+        const response: WebSocketResponse = {
+          data: bitstampData,
+          channel,
+          event,
+        };
         wsList.forEach((ws) => {
-          ws.socket.send(JSON.stringify(bitstampData));
+          ws.socket.send(JSON.stringify(response));
           ws.socket.send(JSON.stringify({ ...ohlcResponse, event: 'OHLC' }));
         });
       }
+
+      if (event === 'bts:error')
+        console.error('bitstampResponse:', bitstampResponse);
     };
   }
 

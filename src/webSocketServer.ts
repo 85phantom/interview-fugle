@@ -1,5 +1,8 @@
 import { WebSocket, WebSocketServer } from 'ws';
 import { SocketChannel, SocketMessage } from './schema/websocketServer';
+import _ from 'lodash';
+import { WebSocketBadRequestError } from './error';
+import { WebSocketResponse } from './schema/websocket';
 
 export class WebSocketServerService {
   public wss: WebSocketServer;
@@ -32,34 +35,50 @@ export class WebSocketServerService {
 
   private updateSocketChannelListByEvent(
     event: string,
-    data: { channels: string[] },
+    data: { channel: string },
     websocket: WebSocket,
+    id: string,
   ) {
     if (event === 'subscribe') {
-      this.subscribeChannel(data.channels, websocket);
-    } else if (event === 'unsubscibe') {
-      this.unsubscribeChannel(data.channels);
+      this.subscribeChannel(data.channel, websocket, id);
+    } else if (event === 'unsubscribe') {
+      this.unsubscribeChannel(data.channel, websocket, id);
     }
   }
 
-  private subscribeChannel(channels: string[], ws: WebSocket) {
-    channels.forEach((channel) => {
-      this.socketChannelList.push({
-        socket: ws,
-        channel: `live_trades_${channel}`,
-      });
+  private subscribeChannel(channel: string, ws: WebSocket, id: string) {
+    this.socketChannelList.push({
+      socket: ws,
+      channel: `live_trades_${channel}`,
     });
+
+    const response: WebSocketResponse = {
+      event: 'subscription_succeeded',
+      channel: channel,
+      data: {},
+    };
+
+    ws.send(JSON.stringify(response));
   }
-  private unsubscribeChannel(channels: string[]) {
-    channels.forEach((channel) => {
-      this.removeSubscribeChannel(channel);
-    });
-  }
-  private removeSubscribeChannel(channel: string) {
+  private unsubscribeChannel(channel: string, ws: WebSocket, id: string) {
     const socketChannel = this.socketChannelList.filter(
       (e) => e.channel === `live_trades_${channel}`,
     )[0];
     const index = this.socketChannelList.indexOf(socketChannel);
     this.socketChannelList.splice(index, 1);
+
+    const response: WebSocketResponse = {
+      event: 'unsubscription_succeeded',
+      channel: channel,
+      data: {},
+    };
+
+    ws.send(JSON.stringify(response));
+  }
+
+  private isSocketRequestVaild(socketMessage: SocketMessage): Boolean {
+    return (
+      _.isString(socketMessage.event) && _.isString(socketMessage.data.channel)
+    );
   }
 }

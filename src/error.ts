@@ -77,3 +77,25 @@ export class GeneralError extends BaseError {
     );
   }
 }
+
+export class WebSocketBadRequestError extends Error {
+  public event: string;
+  public channel: string;
+  public data: WebSocketBadRequestErrorData;
+  constructor(data: any) {
+    super();
+    this.event = data.event ?? 'error';
+    this.channel = data.channel ?? '';
+    this.data = new WebSocketBadRequestErrorData(data.data ?? {});
+  }
+}
+
+export class WebSocketBadRequestErrorData {
+  public code?: string;
+  public message: string;
+
+  constructor(data: any) {
+    this.code = data.code ?? null;
+    this.message = data.message ?? 'Bad subscription string.';
+  }
+}
