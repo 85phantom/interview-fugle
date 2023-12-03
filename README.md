@@ -48,6 +48,15 @@ channel_name 包含了 'btcusd', 'btceur', 'btcgbp', 'btcpax', 'gbpusd', 'eurusd
 	}
 }
 
+# OHLC
+# 取得近十五分鐘的 OHLC 資料
+{
+	"event": "OHLC",
+	"data": {
+		"channel": "[channel_name]"
+	}
+}
+
 ```
 
 ## Installation
